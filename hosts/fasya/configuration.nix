@@ -1,27 +1,30 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, inputs, lib, ... }:
-
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      inputs.home-manager.nixosModules.home-manager
-    ];
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    inputs.home-manager.nixosModules.home-manager
+  ];
 
-    nix.settings.experimental-features = [
+  nix.settings.experimental-features = [
     "nix-command"
     "flakes"
     "cgroups"
-    ];
-    home-manager = {
-        extraSpecialArgs = {inherit inputs; };
-        users = {
-            "fasya" = import ./home.nix;
-        };
+  ];
+  home-manager = {
+    extraSpecialArgs = {inherit inputs;};
+    users = {
+      "fasya" = import ./home.nix;
     };
+  };
 
   # Bootloader.
   boot.loader.grub.enable = true;
@@ -33,7 +36,7 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   networking.hostName = "nixos"; # Define your hostname.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.wireless.enable = true; # Enables wireless support via wpa_supplicant.
   hardware.bluetooth.enable = true;
 
   # Configure network proxy if necessary
@@ -49,23 +52,16 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
-
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-    options = "esc:swapescape";
+  services = {
+    displayManager.sddm.enable = true;
+    xserver.enable = true;
+    xserver.xkb = {
+      layout = "us";
+      variant = "";
+      options = "esc:swapescape";
+    };
+    printing.enable = true;
   };
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
@@ -82,18 +78,29 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+
   users.users.fasya = {
     isNormalUser = true;
     description = "fasya";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = ["networkmanager" "wheel"];
+    shell = pkgs.fish;
     packages = with pkgs; [
-      kdePackages.kate
-    #  thunderbird
+      go
+      trash-cli
     ];
   };
 
   # Install firefox.
-  programs.firefox.enable = true;
+  programs = {
+    firefox.enable = true;
+    fish.enable = true;
+    nix-ld = {
+      enable = true;
+      libraries = with pkgs; [
+        zlib
+      ];
+    };
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -101,28 +108,34 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-   neovim
-   wget
-   curl
-   kitty
-   stow
-   tmux
-   unzip
-   tree
-   fish
-   git
+    libgcc
+    gcc15
+    gnumake
+    neovim
+    zoxide
+    fastfetch
+    wget
+    curl
+    kitty
+    stow
+    tmux
+    unzip
+    tree
+    fish
+    git
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
-   programs.mtr.enable = true;
-   programs.gnupg.agent = {
-   enable = true;
-   enableSSHSupport = true;
-   };
+  programs.mtr.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   # List services that you want to enable:
   services.openssh.enable = true;
+  services.envfs.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -131,5 +144,4 @@
   networking.firewall.enable = false;
 
   system.stateVersion = "25.11"; # Did you read the comment?
-
 }

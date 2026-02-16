@@ -1,6 +1,10 @@
-{ config, pkgs, inputs, ... }:
-
 {
+  config,
+  pkgs,
+  inputs,
+  ...
+}: {
+# TODO: try mkOutOfStoreSymlink, if good replace stow
   home.username = "fasya";
   home.homeDirectory = "/home/fasya";
   home.stateVersion = "25.11"; # Please read the comment before changing.
@@ -23,7 +27,6 @@
     #   echo "Hello, ${config.home.username}!"
     # '')
   ];
-
 
   home.sessionVariables = {
     EDITOR = "nvim";
